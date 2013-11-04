@@ -78,7 +78,11 @@
             <td>Enable sourcemap support. You can compile your less and then use developer tools to see where in your less file a particular piece of css comes from.</td>
             <td><code>false</code></td>
         </tr>
-
+        <tr>
+            <th><code>preprocessor</code></th>
+            <td>Specify a preprocessing function applied to LESS source code before parsing. The function will receive the LESS source code and the Connect request object as parameters, and must return the modified source code.</td>
+            <td>No preprocessing</td>
+        </tr>
     </tbody>
 </table>
 
@@ -149,7 +153,7 @@ var lessMiddleware = require('less-middleware')
   , path = require('path')
   , pubDir = path.join(__dirname, 'public')
   , app = express.createServer();
-  
+
 app.configure(function() {
     app.use(lessMiddleware({
         dest: '/css', // should be the URI to your css directory from the location bar in your browser
@@ -157,7 +161,7 @@ app.configure(function() {
         root: pubDir,
         compress: true
     }));
-    
+
     app.use(express.static(pubDir));
 });
 ```
@@ -294,6 +298,31 @@ app.configure(function(){
   font-family: @monoFontFamily;
 }
 ```
+
+
+### Preprocessing
+
+    var lessMiddleware = require('less-middleware');
+
+    var app = express.createServer();
+
+    app.configure(function () {
+     // Other configuration here...
+
+     app.use(lessMiddleware({
+         src: __dirname + '/public',
+         preprocessor: function(src, req) {
+             if (req.param("namespace")) {
+                 src = req.param("namespace") + " { " + src + " }";
+             }
+
+             return src;
+         },
+         compress: true
+     }));
+
+     app.use(express.static(__dirname + '/public'));
+    });
 
 ## Troubleshooting
 
